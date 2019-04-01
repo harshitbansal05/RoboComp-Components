@@ -1,0 +1,13 @@
+import "TextRecognition.idsl";
+import "CameraSimple.idsl";
+
+Component textrecognitionclient
+{
+	Communications
+	{
+		requires TextRecognition;
+		requires CameraSimple;
+	};
+	language Python;
+};
+
