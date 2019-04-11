@@ -57,7 +57,6 @@ class SpecificWorker(GenericWorker):
 				for line in f.read().splitlines():
 					lexicon.append(line.lower())
 			print "Length of the lexicon: ", len(lexicon)
-			print(lexicon)
 			self.tree = BKTree(hamming_distance, lexicon)
 
 	def setParams(self, params):

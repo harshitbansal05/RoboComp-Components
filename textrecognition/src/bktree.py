@@ -113,8 +113,7 @@ class BKTree(object):
             candidate, children = _candidates_popleft()
             distance = _distance_func(candidate, item)
             if distance <= n:
-            	print distance, candidate
-                _found_append((distance, candidate))
+            	_found_append((distance, candidate))
 
             if children:
                 lower = distance - n

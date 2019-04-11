@@ -59,9 +59,13 @@ class SpecificWorker(GenericWorker):
 			startY = textData.startY
 			endX = textData.endX
 			endY = textData.endY
-			label = textData.label
+			labels = textData.label.split("&")
+			if labels[1]:
+				label = labels[0] + ", " + labels[1]
+			else:
+				label = labels[0]
 			cv2.rectangle(frame, (startX, startY), (endX, endY), (255, 0, 0), 2)
-			cv2.putText(frame, label, (startX, startY - 2), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA)
+			cv2.putText(frame, label, (startX, startY - 2), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2, cv2.LINE_AA)
 		cv2.imshow('Text', frame)
 
 		return True
