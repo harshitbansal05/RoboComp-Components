@@ -88,6 +88,57 @@ class strLabelConverter(object):
                 index += l
             return texts
 
+    def decode_with_lexicon(self, t, tr, length, use_lexicon, tree):
+        """Decode encoded texts back into strs.
+
+        Args:
+            torch.IntTensor [length_0 + length_1 + ... length_{n - 1}]: encoded texts.
+            torch.IntTensor [n]: length of each text.
+
+        Raises:
+            AssertionError: when the texts and its length does not match.
+
+        Returns:
+            text (str or list of str): texts to convert.
+        """
+        if length.numel() == 1:
+            length = length[0]
+            assert tr.numel() == length, "text with length: {} does not match declared length: {}".format(tr.numel(), length)
+            char_list = []
+            for i in range(length):
+                if tr[i] != 0 and (not (i > 0 and tr[i - 1] == tr[i])):
+                    char_list.append(self.alphabet[tr[i] - 1])
+            lexicon_free_label = ''.join(char_list)
+            if use_lexicon is False:
+                return lexicon_free_label, ""
+            neighbor_candidates = tree.find(lexicon_free_label, 2)
+            candidates = []
+            for candidate in neighbor_candidates:
+                candidates.append(candidate[1])
+            candidates = candidates[:30]
+            si = len(candidates)
+            if si == 0:
+                return lexicon_free_label, ""
+            t = t.repeat(1, si, 1)
+            te, l = self.encode(candidates)
+            il = torch.IntTensor([t.size(0)] * si)
+            ctc_loss = nn.CTCLoss(reduction='none')
+            lo = ctc_loss(t, te, il, l)
+            i = torch.argmin(lo)
+            return lexicon_free_label, candidates[i]
+        else:
+            # batch mode
+            assert t.numel() == length.sum(), "texts with length: {} does not match declared length: {}".format(t.numel(), length.sum())
+            texts = []
+            index = 0
+            for i in range(length.numel()):
+                l = length[i]
+                texts.append(
+                    self.decode(
+                        t[index:index + l], torch.IntTensor([l]), raw=raw))
+                index += l
+            return texts
+
 
 class averager(object):
     """Compute average for `torch.Variable` and `torch.Tensor`. """

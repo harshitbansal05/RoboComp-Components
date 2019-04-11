@@ -67,7 +67,7 @@ def decode_predictions(scores, geometry):
 	# return a tuple of the bounding boxes and associated confidences
 	return (rects, confidences)
 
-def get_text(net, model, image):
+def get_text(net, model, image, use_lexicon, tree):
 	orig = image.copy()
 	(origH, origW) = image.shape[:2]
 
@@ -126,7 +126,8 @@ def get_text(net, model, image):
 
 		# extract the actual padded ROI
 		roi = orig[startY:endY, startX:endX]
-		label = recognize_text.get_label(model, roi)
+		(label_wo, label_w) = recognize_text.get_label(model, roi, use_lexicon, tree)
+		label = label_wo + "&" + label_w
 		results.append(((startX, startY, endX, endY), label))
 
 	# sort the results bounding box coordinates from top to bottom

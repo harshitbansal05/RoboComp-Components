@@ -99,9 +99,17 @@ if __name__ == '__main__':
 			params[1] = '--Ice.Config=' + params[1]
 	elif len(params) == 1:
 		params.append('--Ice.Config=config')
+	use_lexicon = False
+	if len(params) > 2:
+		if params[2].startswith('--use_lexicon='):
+			use_lexicon_arg = params[2].split('=')[1]
+			if use_lexicon_arg.lower() == "true" or use_lexicon_arg.lower() == "t":
+				use_lexicon = True
+		params = params[:2]
 	ic = Ice.initialize(params)
 	status = 0
 	mprx = {}
+	mprx["use_lexicon"] = use_lexicon
 	parameters = {}
 	for i in ic.getProperties():
 		parameters[str(i)] = str(ic.getProperties().getProperty(i))

@@ -80,7 +80,7 @@ class GenericWorker(QtCore.QObject):
 
 
 		self.camerasimple_proxy = mprx["CameraSimpleProxy"]
-
+		self.use_lexicon = mprx["use_lexicon"]
 
 		self.mutex = QtCore.QMutex(QtCore.QMutex.Recursive)
 		self.Period = 30

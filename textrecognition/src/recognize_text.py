@@ -22,7 +22,7 @@ class resizeNormalize(object):
         img.sub_(0.5).div_(0.5)
         return img
 
-def get_label(model, img):
+def get_label(model, img, use_lexicon, tree):
 	converter = utils.strLabelConverter(alphabet)
 
 	transformer = resizeNormalize((100, 32))
@@ -35,11 +35,10 @@ def get_label(model, img):
 	image = Variable(image)
 
 	model.eval()
-	preds = model(image)
-	_, preds = preds.max(2)
+	pred = model(image)
+	_, preds = pred.max(2)
 	preds = preds.transpose(1, 0).contiguous().view(-1)
 
 	preds_size = Variable(torch.IntTensor([preds.size(0)]))
-	raw_pred = converter.decode(preds.data, preds_size.data, raw=True)
-	sim_pred = converter.decode(preds.data, preds_size.data, raw=False)
-	return sim_pred
+	a, b = converter.decode_with_lexicon(pred.data, preds.data, preds_size.data, use_lexicon, tree)
+	return (a, b)
