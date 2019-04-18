@@ -10,6 +10,7 @@ This is the repository for the RoboComp component performing near real-time end-
 - Numpy
 - Pillow
 - Torchvision
+- python-Levenshtein
 
 ### Running the component:
 ```
@@ -36,6 +37,11 @@ python src/textrecognition.py --Ice.Config=etc/config
 cd textrecognitionclient
 python src/textrecognitionclient.py --Ice.Config=etc/config
 ```
+The component can be run either in lexicon free or lexicon based mode. To run the component in lexicon based mode, replace the previous command with:
+```
+python src/textrecognitionclient.py --Ice.Config=etc/config --use_lexicon=True
+```
+It refers words within an edit distance of 2 from the lexicon free prediction, and outputs the one with the maximum conditional probability over the label distributions.
 
 This should show the frames captured through the webcam, with a bounding box around each text, and the corresponding label associated with the text.
 
