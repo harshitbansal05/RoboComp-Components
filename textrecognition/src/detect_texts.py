@@ -3,12 +3,26 @@ import numpy as np
 import argparse
 import cv2
 
+import torch
+from PIL import Image
+import torchvision.transforms as transforms
+
 import recognize_text
 
 width = 320
 height = 320
 padding = 0.0
 confidence = 0.5
+
+class resizeNormalize(object):
+
+    def __init__(self):
+        self.toTensor = transforms.ToTensor()
+
+    def __call__(self, img):
+        img = self.toTensor(img)
+        img.sub_(0.5).div_(0.5)
+        return img
 
 def decode_predictions(scores, geometry):
 	# grab the number of rows and columns from the scores volume, then
@@ -100,11 +114,14 @@ def get_text(net, model, image, use_lexicon, tree):
 	(rects, confidences) = decode_predictions(scores, geometry)
 	boxes = non_max_suppression(np.array(rects), probs=confidences)
 
-	# initialize the list of results
-	results = []
-
 	# loop over the bounding boxes
-	for (startX, startY, endX, endY) in boxes:
+	num = len(boxes)
+	if num == 0:
+		return []
+	print("Num: ", len(boxes))
+	rois = torch.zeros((num, 1, 32, 100))
+	coords = []
+	for i, (startX, startY, endX, endY) in enumerate(boxes):
 		# scale the bounding box coordinates based on the respective
 		# ratios
 		startX = int(startX * rW)
@@ -126,10 +143,18 @@ def get_text(net, model, image, use_lexicon, tree):
 
 		# extract the actual padded ROI
 		roi = orig[startY:endY, startX:endX]
-		(label_wo, label_w) = recognize_text.get_label(model, roi, use_lexicon, tree)
-		label = label_wo + "&" + label_w
-		results.append(((startX, startY, endX, endY), label))
-
-	# sort the results bounding box coordinates from top to bottom
+		roi = cv2.cvtColor(roi, cv2.COLOR_BGR2RGB)
+		roi = Image.fromarray(roi).convert('L')
+		roi = roi.resize((100, 32), Image.BILINEAR)
+		transformer = resizeNormalize()
+		roi = transformer(roi)
+		rois[i] = roi
+		coords.append((startX, startY, endX, endY))
+	results = recognize_text.get_label(model, rois, use_lexicon, tree)
+	print(results)
+	print(coords)
+	for i, coord in enumerate(coords):
+		results[i] = (coord, results[i]) 
+	print(results)
 	results = sorted(results, key=lambda r:r[0][1])
 	return results

@@ -9,36 +9,17 @@ import cv2
 
 alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'
 
-class resizeNormalize(object):
-
-    def __init__(self, size, interpolation=Image.BILINEAR):
-        self.size = size
-        self.interpolation = interpolation
-        self.toTensor = transforms.ToTensor()
-
-    def __call__(self, img):
-        img = img.resize(self.size, self.interpolation)
-        img = self.toTensor(img)
-        img.sub_(0.5).div_(0.5)
-        return img
-
-def get_label(model, img, use_lexicon, tree):
+def get_label(model, images, use_lexicon, tree):
 	converter = utils.strLabelConverter(alphabet)
-
-	transformer = resizeNormalize((100, 32))
-	img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-	image = Image.fromarray(img).convert('L')
-	image = transformer(image)
+	print "Shape: ", images.shape
 	if torch.cuda.is_available():
-	    image = image.cuda()
-	image = image.view(1, *image.size())
-	image = Variable(image)
+	    images = images.cuda()
+	images = Variable(images)
 
 	model.eval()
-	pred = model(image)
+	pred = model(images) # [26, b, 37]
 	_, preds = pred.max(2)
-	preds = preds.transpose(1, 0).contiguous().view(-1)
-
-	preds_size = Variable(torch.IntTensor([preds.size(0)]))
-	a, b = converter.decode_with_lexicon(pred.data, preds.data, preds_size.data, use_lexicon, tree)
-	return (a, b)
+	preds = preds.transpose(1, 0).contiguous().view(-1) # [b*26]
+	preds_size = Variable(torch.IntTensor([pred.size(0)] * pred.size(1)))
+	results = converter.decode_with_lexicon(pred.data, preds.data, preds_size.data, use_lexicon, tree)
+	return results

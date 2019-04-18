@@ -110,7 +110,8 @@ class strLabelConverter(object):
                     char_list.append(self.alphabet[tr[i] - 1])
             lexicon_free_label = ''.join(char_list)
             if use_lexicon is False:
-                return lexicon_free_label, ""
+                label = lexicon_free_label + '&' + ""
+                return [label]
             neighbor_candidates = tree.find(lexicon_free_label, 2)
             candidates = []
             for candidate in neighbor_candidates:
@@ -118,24 +119,28 @@ class strLabelConverter(object):
             candidates = candidates[:30]
             si = len(candidates)
             if si == 0:
-                return lexicon_free_label, ""
+                label = lexicon_free_label + '&' + ""
+                return [label]
             t = t.repeat(1, si, 1)
             te, l = self.encode(candidates)
             il = torch.IntTensor([t.size(0)] * si)
             ctc_loss = nn.CTCLoss(reduction='none')
             lo = ctc_loss(t, te, il, l)
             i = torch.argmin(lo)
-            return lexicon_free_label, candidates[i]
+            label = lexicon_free_label + '&' + candidates[i]
+            return [label]
         else:
             # batch mode
-            assert t.numel() == length.sum(), "texts with length: {} does not match declared length: {}".format(t.numel(), length.sum())
+            assert tr.numel() == length.sum(), "texts with length: {} does not match declared length: {}".format(tr.numel(), length.sum())
             texts = []
             index = 0
             for i in range(length.numel()):
                 l = length[i]
-                texts.append(
-                    self.decode(
-                        t[index:index + l], torch.IntTensor([l]), raw=raw))
+                ti = t[:, i, :]
+                ti = ti.unsqueeze(1)
+                texts.extend(
+                    self.decode_with_lexicon(
+                        ti, tr[index:index + l], torch.IntTensor([l]), use_lexicon, tree))
                 index += l
             return texts
 
