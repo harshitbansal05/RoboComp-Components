@@ -82,7 +82,6 @@ class SpecificWorker(GenericWorker):
 				ymax = maxs[1]
 				label = result[1]
 				label = label + ","
-				label = label + ""
 				label += str(box[0][0]) + "," + str(box[0][1]) + "," + str(box[1][0]) + "," + str(box[1][1]) + \
 				"," + str(box[2][0]) + "," + str(box[2][1]) + "," + str(box[3][0]) + "," + str(box[3][1]) 
 				textData = SText()

@@ -69,9 +69,8 @@ class SpecificWorker(GenericWorker):
 				label = labels[0]
 			if "a" not in labels[0] and "b" not in labels[0] and "c" not in labels[0] and "d" not in labels[0] and "e" not in labels[0]:
 				continue
-			# cv2.rectangle(frame, (startX, startY), (endX, endY), (255, 0, 0), 2)
-			cv2.polylines(frame, [box.astype(np.int32).reshape((-1, 1, 2))], True, color=(255, 255, 255), thickness=2)
-			cv2.putText(frame, label, (startX, startY - 2), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2, cv2.LINE_AA)
+			cv2.polylines(frame, [box.astype(np.int32).reshape((-1, 1, 2))], True, color=(255, 0, 0), thickness=2)
+			cv2.putText(frame, label, (startX, startY), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2, cv2.LINE_AA)
 		cv2.imshow('Text', frame)
 
 		return True

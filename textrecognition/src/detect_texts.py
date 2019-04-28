@@ -130,10 +130,9 @@ def get_text(net, model, image_orig, use_lexicon, tree):
 	coords = []
 
 	for i, box in enumerate(boxes):
-		dst = np.asarray([[3, 3], [97, 3], [97, 28], [3, 28]])
+		dst = np.asarray([[2, 1], [97, 1], [97, 30], [2, 30]])
 		trans = cv2.getPerspectiveTransform(np.float32(box), np.float32(dst))
 		rotated = cv2.warpPerspective(image_orig, trans, (100, 32), flags=cv2.INTER_LINEAR)
-		cv2.imwrite('rotated{index}.png'.format(index=i), rotated)
 		roi = cv2.cvtColor(rotated, cv2.COLOR_BGR2RGB)
 		roi = Image.fromarray(roi).convert('L')
 		roi = roi.resize((100, 32), Image.BILINEAR)
