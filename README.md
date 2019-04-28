@@ -11,6 +11,7 @@ This is the repository for the RoboComp component performing near real-time end-
 - Pillow
 - Torchvision
 - python-Levenshtein
+- Shapely
 
 ### Running the component:
 ```
