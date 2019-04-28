@@ -46,7 +46,7 @@ class SpecificWorker(GenericWorker):
 		self.net = cv2.dnn.readNet(NET_FILE)
 		self.model = crnn.CRNN(32, 1, 37, 256)
 		if torch.cuda.is_available():
-		    self.model = self.model.cuda()
+			self.model = self.model.cuda()
 		print "[INFO] loading CRNN text recognizer..."
 		self.model.load_state_dict(torch.load(MODEL_FILE))
 		self.tree = None
@@ -74,12 +74,21 @@ class SpecificWorker(GenericWorker):
 			texts = list()
 			for result in results:
 				box = result[0]
+				mins = box.min(axis=0)
+				xmin = mins[0]
+				ymin = mins[1]
+				maxs = box.max(axis=0)
+				xmax = maxs[0]
+				ymax = maxs[1]
 				label = result[1]
+				label = label + ","
+				label += str(box[0][0]) + "," + str(box[0][1]) + "," + str(box[1][0]) + "," + str(box[1][1]) + \
+				"," + str(box[2][0]) + "," + str(box[2][1]) + "," + str(box[3][0]) + "," + str(box[3][1]) 
 				textData = SText()
-				textData.startX = box[0]
-				textData.startY = box[1]
-				textData.endX = box[2]
-				textData.endY = box[3]
+				textData.startX = xmin
+				textData.startY = ymin
+				textData.endX = xmax
+				textData.endY = ymax
 				textData.label = label
 				texts.append(textData)
 			print "Time: ", time.time() - time1
