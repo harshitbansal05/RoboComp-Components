@@ -59,12 +59,16 @@ class SpecificWorker(GenericWorker):
 			startY = textData.startY
 			endX = textData.endX
 			endY = textData.endY
-			labels = textData.label.split("&")
+			box = textData.label.split(",")[1:]
+			box = np.asarray(box, dtype=np.float32).reshape((4, 2))
+			labels = textData.label.split(",")[0]
+			labels = labels.split("&")
 			if labels[1]:
 				label = labels[0] + ", " + labels[1]
 			else:
 				label = labels[0]
-			cv2.rectangle(frame, (startX, startY), (endX, endY), (255, 0, 0), 2)
+			# cv2.rectangle(frame, (startX, startY), (endX, endY), (255, 0, 0), 2)
+			cv2.polylines(frame, [box.astype(np.int32).reshape((-1, 1, 2))], True, color=(255, 255, 255), thickness=1)
 			cv2.putText(frame, label, (startX, startY - 2), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2, cv2.LINE_AA)
 		cv2.imshow('Text', frame)
 
