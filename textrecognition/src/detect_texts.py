@@ -130,7 +130,7 @@ def get_text(net, model, image_orig, use_lexicon, tree):
 	coords = []
 
 	for i, box in enumerate(boxes):
-		dst = np.asarray([[0, 0], [99, 0], [99, 31], [0, 31]])
+		dst = np.asarray([[3, 3], [97, 3], [97, 28], [3, 28]])
 		trans = cv2.getPerspectiveTransform(np.float32(box), np.float32(dst))
 		rotated = cv2.warpPerspective(image_orig, trans, (100, 32), flags=cv2.INTER_LINEAR)
 		cv2.imwrite('rotated{index}.png'.format(index=i), rotated)
